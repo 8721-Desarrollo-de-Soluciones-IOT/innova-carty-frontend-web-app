@@ -1,9 +1,9 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { Observable, tap } from 'rxjs';
+import { Observable, of, switchMap, tap, throwError } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { SignInRequest, User } from '../domain/model/user.entity';
+import { SignInRequest, User, canUseConsole } from '../domain/model/user.entity';
 
 const STORAGE_KEY = 'ic-console-session';
 
@@ -23,6 +23,11 @@ export class AuthService {
         password: request.password,
       })
       .pipe(
+        switchMap((user) =>
+          canUseConsole(user)
+            ? of(user)
+            : throwError(() => new HttpErrorResponse({ status: 403, statusText: 'Shopper account' })),
+        ),
         tap((user) => {
           this.user.set(user);
           this.storage(remember)?.setItem(STORAGE_KEY, JSON.stringify(user));

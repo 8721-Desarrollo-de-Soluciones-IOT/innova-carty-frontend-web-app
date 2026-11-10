@@ -53,8 +53,18 @@ export class SignIn {
       },
       error: (err: HttpErrorResponse) => {
         this.loading.set(false);
-        this.error.set(err.status === 401 ? 'Incorrect email or password.' : 'We could not reach the server. Try again.');
+        this.error.set(SignIn.errorMessage(err.status));
       },
     });
+  }
+
+  private static errorMessage(status: number): string {
+    if (status === 401) return 'Incorrect email or password.';
+    if (status === 403) return 'This is a shopper account. Shoppers use the Innova Carty mobile app.';
+    // Render free plan: the API sleeps after 15 min without requests and takes about a minute to wake up.
+    if (status === 0 || status === 502 || status === 503 || status === 504) {
+      return 'The server is waking up (about 1 minute). Try again in a moment.';
+    }
+    return 'We could not reach the server. Try again.';
   }
 }

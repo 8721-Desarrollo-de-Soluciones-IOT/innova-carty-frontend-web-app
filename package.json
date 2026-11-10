@@ -3,8 +3,9 @@
   "version": "0.1.0",
   "scripts": {
     "ng": "ng",
-    "start": "concurrently -k -n api,web -c blue,green \"npm:api\" \"npm:serve\"",
-    "serve": "ng serve --proxy-config proxy.conf.json",
+    "start": "ng serve",
+    "start:fake": "concurrently -k -n api,web -c blue,green \"npm:api\" \"npm:serve:fake\"",
+    "serve:fake": "ng serve --configuration fake --proxy-config proxy.conf.json",
     "api": "node server/server.js",
     "api:reset": "node server/server.js --reset",
     "build": "ng build",

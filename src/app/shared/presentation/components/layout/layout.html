@@ -70,7 +70,7 @@
         <span class="avatar">{{ userInitials() }}</span>
         <span class="user__text">
           <b>{{ user()?.fullName }}</b>
-          <span class="caption">{{ user()?.role }}</span>
+          <span class="caption">{{ user()?.jobTitle || user()?.role }}</span>
         </span>
         <mat-icon>expand_more</mat-icon>
       </button>
