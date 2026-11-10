@@ -8,6 +8,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { ActivatedRoute, Router } from '@angular/router';
+import { LangSwitch } from '../../../../shared/i18n/lang-switch';
+import { TranslatePipe } from '../../../../shared/i18n/translate.pipe';
 import { AuthService } from '../../../infrastructure/auth.service';
 
 @Component({
@@ -20,6 +22,8 @@ import { AuthService } from '../../../infrastructure/auth.service';
     MatIconModule,
     MatInputModule,
     MatProgressBarModule,
+    LangSwitch,
+    TranslatePipe,
   ],
   templateUrl: './sign-in.html',
   styleUrl: './sign-in.css',
@@ -36,6 +40,7 @@ export class SignIn {
   });
   protected readonly hidePassword = signal(true);
   protected readonly loading = signal(false);
+  /** i18n key of the error. */
   protected readonly error = signal<string | null>(null);
 
   protected submit(): void {
@@ -59,12 +64,12 @@ export class SignIn {
   }
 
   private static errorMessage(status: number): string {
-    if (status === 401) return 'Incorrect email or password.';
-    if (status === 403) return 'This is a shopper account. Shoppers use the Innova Carty mobile app.';
+    if (status === 401) return 'signIn.error401';
+    if (status === 403) return 'signIn.error403';
     // Render free plan: the API sleeps after 15 min without requests and takes about a minute to wake up.
     if (status === 0 || status === 502 || status === 503 || status === 504) {
-      return 'The server is waking up (about 1 minute). Try again in a moment.';
+      return 'signIn.errorWaking';
     }
-    return 'We could not reach the server. Try again.';
+    return 'signIn.errorNetwork';
   }
 }

@@ -9,6 +9,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { Observable } from 'rxjs';
+import { TranslatePipe } from '../../../../shared/i18n/translate.pipe';
 import { PRODUCT_CATEGORIES, Product, allowedRange } from '../../../domain/model/product.entity';
 import { ProductsApi } from '../../../infrastructure/products-api';
 
@@ -20,7 +21,17 @@ export interface ProductFormDialogData {
 
 @Component({
   selector: 'app-product-form-dialog',
-  imports: [DecimalPipe, ReactiveFormsModule, MatButtonModule, MatDialogModule, MatFormFieldModule, MatIconModule, MatInputModule, MatSelectModule],
+  imports: [
+    DecimalPipe,
+    ReactiveFormsModule,
+    MatButtonModule,
+    MatDialogModule,
+    MatFormFieldModule,
+    MatIconModule,
+    MatInputModule,
+    MatSelectModule,
+    TranslatePipe,
+  ],
   templateUrl: './product-form-dialog.html',
   styleUrl: './product-form-dialog.css',
 })
@@ -32,13 +43,15 @@ export class ProductFormDialog {
   protected readonly isNew = this.data.product === null;
   protected readonly categories = PRODUCT_CATEGORIES;
   protected readonly saving = signal(false);
+  /** i18n key of the error. */
   protected readonly error = signal<string | null>(null);
 
   protected readonly form = inject(NonNullableFormBuilder).group({
     id: [{ value: this.data.product?.id ?? '', disabled: !this.isNew }, [Validators.required, Validators.pattern(/^SKU-\d{5}$/)]],
     name: [this.data.product?.name ?? '', [Validators.required, Validators.maxLength(60)]],
     category: [this.data.product?.category ?? 'Grocery', Validators.required],
-    rfidPrefix: [this.data.product?.rfidPrefix ?? '', [Validators.required, Validators.pattern(/^E200( \d{4}){2}$/)]],
+    // Hexadecimal UID or UID prefix: "E200 3412 0127" (UHF) or "04414793C92A81" (NTAG215 of the prototype).
+    rfidPrefix: [this.data.product?.rfidPrefix ?? '', [Validators.required, Validators.pattern(/^[0-9A-Fa-f]{2}(?: ?[0-9A-Fa-f]{2}){1,15}$/)]],
     price: [this.data.product?.price ?? 0, [Validators.required, Validators.min(0.1)]],
     nominalWeight: [this.data.product?.nominalWeight ?? 0, [Validators.required, Validators.min(1)]],
     tolerance: [this.data.product?.tolerance ?? 3, [Validators.required, Validators.min(1), Validators.max(15)]],
@@ -77,7 +90,7 @@ export class ProductFormDialog {
       next: (saved) => this.ref.close(saved),
       error: () => {
         this.saving.set(false);
-        this.error.set('The product could not be saved. Try again.');
+        this.error.set('product.failed');
       },
     });
   }

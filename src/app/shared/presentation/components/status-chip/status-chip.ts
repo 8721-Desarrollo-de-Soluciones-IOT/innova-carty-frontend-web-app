@@ -1,26 +1,29 @@
 import { Component, computed, input } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { CartStatus } from '../../../../monitoring/domain/model/cart.entity';
+import { TranslatePipe } from '../../../i18n/translate.pipe';
 
-const STATUS_VIEW: Record<CartStatus, { label: string; icon: string; tone: string }> = {
-  IN_SESSION: { label: 'In session', icon: 'shopping_cart', tone: 'ok' },
-  DISCREPANCY: { label: 'Discrepancy', icon: 'scale', tone: 'warn' },
-  LOCKED: { label: 'Locked', icon: 'lock', tone: 'err' },
-  PAID: { label: 'Paid · clearance', icon: 'verified', tone: 'info' },
-  OFFLINE: { label: 'Offline', icon: 'wifi_off', tone: 'off' },
-  AVAILABLE: { label: 'Available', icon: 'check', tone: 'off' },
+const STATUS_VIEW: Record<CartStatus, { icon: string; tone: string }> = {
+  IN_SESSION: { icon: 'shopping_cart', tone: 'ok' },
+  DISCREPANCY: { icon: 'scale', tone: 'warn' },
+  LOCKED: { icon: 'lock', tone: 'err' },
+  PAID: { icon: 'verified', tone: 'info' },
+  OFFLINE: { icon: 'wifi_off', tone: 'off' },
+  AVAILABLE: { icon: 'check', tone: 'off' },
 };
 
+/** i18n key of the status label (use it with the t pipe). */
 export function cartStatusLabel(status: CartStatus): string {
-  return STATUS_VIEW[status].label;
+  return `status.${status}`;
 }
 
 @Component({
   selector: 'app-status-chip',
-  imports: [MatIconModule],
-  template: `<span class="chip {{ view().tone }}"><mat-icon>{{ view().icon }}</mat-icon>{{ view().label }}</span>`,
+  imports: [MatIconModule, TranslatePipe],
+  template: `<span class="chip {{ view().tone }}"><mat-icon>{{ view().icon }}</mat-icon>{{ label() | t }}</span>`,
 })
 export class StatusChip {
   readonly status = input.required<CartStatus>();
   protected readonly view = computed(() => STATUS_VIEW[this.status()]);
+  protected readonly label = computed(() => cartStatusLabel(this.status()));
 }

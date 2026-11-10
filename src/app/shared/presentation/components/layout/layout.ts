@@ -15,9 +15,12 @@ import { AuthService } from '../../../../iam/infrastructure/auth.service';
 import { isOpen } from '../../../../monitoring/domain/model/alert.entity';
 import { AlertsApi, StoresApi } from '../../../../monitoring/infrastructure/monitoring-api';
 import { poll } from '../../../infrastructure/polling';
+import { LangSwitch } from '../../../i18n/lang-switch';
+import { ServerTextPipe, TranslatePipe } from '../../../i18n/translate.pipe';
 
 interface NavItem {
   icon: string;
+  /** i18n key. */
   label: string;
   link: string;
 }
@@ -26,6 +29,9 @@ interface NavItem {
   selector: 'app-layout',
   imports: [
     FormsModule,
+    LangSwitch,
+    TranslatePipe,
+    ServerTextPipe,
     MatBadgeModule,
     MatButtonModule,
     MatIconModule,
@@ -55,10 +61,10 @@ export class Layout {
   );
 
   protected readonly nav: NavItem[] = [
-    { icon: 'dashboard', label: 'Dashboard', link: '/dashboard' },
-    { icon: 'shopping_cart', label: 'Carts', link: '/carts' },
-    { icon: 'notifications_active', label: 'Alerts', link: '/alerts' },
-    { icon: 'inventory_2', label: 'Catalog', link: '/catalog' },
+    { icon: 'dashboard', label: 'nav.dashboard', link: '/dashboard' },
+    { icon: 'shopping_cart', label: 'nav.carts', link: '/carts' },
+    { icon: 'notifications_active', label: 'nav.alerts', link: '/alerts' },
+    { icon: 'inventory_2', label: 'nav.catalog', link: '/catalog' },
   ];
 
   protected readonly openAlerts = toSignal(

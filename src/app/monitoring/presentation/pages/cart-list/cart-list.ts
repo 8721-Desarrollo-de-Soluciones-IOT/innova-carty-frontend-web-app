@@ -10,12 +10,14 @@ import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { ActivatedRoute, Router } from '@angular/router';
 import { catchError, combineLatest, map, of } from 'rxjs';
+import { ServerTextPipe, TranslatePipe } from '../../../../shared/i18n/translate.pipe';
 import { poll } from '../../../../shared/infrastructure/polling';
 import { StatusChip, cartStatusLabel } from '../../../../shared/presentation/components/status-chip/status-chip';
 import { isOpen } from '../../../domain/model/alert.entity';
-import { CART_STATUSES, Cart, CartStatus, needsAttention } from '../../../domain/model/cart.entity';
+import { CART_STATUSES, Cart, CartStatus, isOnline, isPhysical, needsAttention } from '../../../domain/model/cart.entity';
 import { AlertsApi, CartsApi } from '../../../infrastructure/monitoring-api';
 
 type Filter = CartStatus | 'ALL';
@@ -34,7 +36,10 @@ type Filter = CartStatus | 'ALL';
     MatProgressBarModule,
     MatSortModule,
     MatTableModule,
+    MatTooltipModule,
+    ServerTextPipe,
     StatusChip,
+    TranslatePipe,
   ],
   templateUrl: './cart-list.html',
   styleUrl: './cart-list.css',
@@ -74,12 +79,14 @@ export class CartList implements AfterViewInit {
   protected readonly filters = computed(() => {
     const all = this.carts() ?? [];
     return [
-      { value: 'ALL' as Filter, label: 'All', count: all.length },
+      { value: 'ALL' as Filter, label: 'common.all', count: all.length },
       ...CART_STATUSES.map((s) => ({ value: s as Filter, label: cartStatusLabel(s), count: all.filter((c) => c.status === s).length })),
     ];
   });
 
   protected readonly needsAttention = needsAttention;
+  protected readonly isPhysical = isPhysical;
+  protected readonly isOnline = isOnline;
 
   constructor() {
     // Keep the table in sync with the live data, the status chip and the search box.
@@ -100,10 +107,15 @@ export class CartList implements AfterViewInit {
   ngAfterViewInit(): void {
     this.dataSource.paginator = this.paginator() ?? null;
     this.dataSource.sort = this.sort() ?? null;
-    // Problems first, then most recent activity.
+    // Physical prototype first, then problems, then most recent activity.
     this.dataSource.sortData = (data, sort) => {
       if (!sort.active || !sort.direction) {
-        return [...data].sort((a, b) => Number(needsAttention(b)) - Number(needsAttention(a)) || b.lastEventAt.localeCompare(a.lastEventAt));
+        return [...data].sort(
+          (a, b) =>
+            Number(isPhysical(b)) - Number(isPhysical(a)) ||
+            Number(needsAttention(b)) - Number(needsAttention(a)) ||
+            b.lastEventAt.localeCompare(a.lastEventAt),
+        );
       }
       const dir = sort.direction === 'asc' ? 1 : -1;
       return [...data].sort((a, b) => {

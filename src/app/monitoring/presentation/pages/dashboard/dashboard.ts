@@ -7,6 +7,8 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { RouterLink } from '@angular/router';
 import { catchError, combineLatest, map, of } from 'rxjs';
 import { AuthService } from '../../../../iam/infrastructure/auth.service';
+import { I18n } from '../../../../shared/i18n/i18n.service';
+import { ServerTextPipe, TranslatePipe } from '../../../../shared/i18n/translate.pipe';
 import { poll } from '../../../../shared/infrastructure/polling';
 import { LineChart } from '../../../../shared/presentation/components/line-chart/line-chart';
 import { cartStatusLabel } from '../../../../shared/presentation/components/status-chip/status-chip';
@@ -25,12 +27,13 @@ const FLEET_TONES: Record<CartStatus, string> = {
 
 @Component({
   selector: 'app-dashboard',
-  imports: [CurrencyPipe, DatePipe, LineChart, MatButtonModule, MatIconModule, MatProgressBarModule, RouterLink],
+  imports: [CurrencyPipe, DatePipe, LineChart, MatButtonModule, MatIconModule, MatProgressBarModule, RouterLink, ServerTextPipe, TranslatePipe],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css',
 })
 export class Dashboard {
   private readonly auth = inject(AuthService);
+  private readonly i18n = inject(I18n);
   private readonly cartsApi = inject(CartsApi);
   private readonly alertsApi = inject(AlertsApi);
   private readonly storesApi = inject(StoresApi);
@@ -64,7 +67,7 @@ export class Dashboard {
 
   protected readonly greeting = computed(() => {
     const hour = new Date().getHours();
-    const part = hour < 12 ? 'Good morning' : hour < 19 ? 'Good afternoon' : 'Good evening';
+    const part = this.i18n.t(hour < 12 ? 'dash.morning' : hour < 19 ? 'dash.afternoon' : 'dash.evening');
     return `${part}, ${this.auth.currentUser()?.fullName.split(' ')[0] ?? ''}`;
   });
 

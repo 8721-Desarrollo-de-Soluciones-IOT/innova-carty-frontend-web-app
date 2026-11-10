@@ -9,12 +9,14 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterLink } from '@angular/router';
 import { catchError, combineLatest, map, of, startWith, switchMap } from 'rxjs';
+import { I18n } from '../../../../shared/i18n/i18n.service';
+import { ServerTextPipe, TranslatePipe } from '../../../../shared/i18n/translate.pipe';
 import { poll } from '../../../../shared/infrastructure/polling';
 import { StatusChip } from '../../../../shared/presentation/components/status-chip/status-chip';
 import { CartSupervisionService } from '../../../application/cart-supervision.service';
 import { Alert, isOpen } from '../../../domain/model/alert.entity';
 import { CartEvent } from '../../../domain/model/cart-event.entity';
-import { Cart, needsAttention } from '../../../domain/model/cart.entity';
+import { Cart, isOnline, isPhysical, needsAttention } from '../../../domain/model/cart.entity';
 import { ShoppingSession, isWeightWithinTolerance, weightDifference } from '../../../domain/model/shopping-session.entity';
 import { AlertsApi, CartEventsApi, CartsApi, ShoppingSessionsApi } from '../../../infrastructure/monitoring-api';
 import { UnlockCartDialog, UnlockCartDialogData } from '../../components/unlock-cart-dialog/unlock-cart-dialog';
@@ -40,7 +42,19 @@ const EVENT_ICONS: Record<string, string> = {
 
 @Component({
   selector: 'app-cart-detail',
-  imports: [CurrencyPipe, DatePipe, DecimalPipe, MatButtonModule, MatIconModule, MatProgressBarModule, MatTooltipModule, RouterLink, StatusChip],
+  imports: [
+    CurrencyPipe,
+    DatePipe,
+    DecimalPipe,
+    MatButtonModule,
+    MatIconModule,
+    MatProgressBarModule,
+    MatTooltipModule,
+    RouterLink,
+    ServerTextPipe,
+    StatusChip,
+    TranslatePipe,
+  ],
   templateUrl: './cart-detail.html',
   styleUrl: './cart-detail.css',
 })
@@ -55,6 +69,7 @@ export class CartDetail {
   private readonly supervision = inject(CartSupervisionService);
   private readonly dialog = inject(MatDialog);
   private readonly snackBar = inject(MatSnackBar);
+  private readonly i18n = inject(I18n);
   private readonly refresh = signal(0);
 
   private readonly view = toSignal(
@@ -93,6 +108,8 @@ export class CartDetail {
 
   protected readonly toneChip = TONE_CHIP;
   protected readonly eventIcons = EVENT_ICONS;
+  protected readonly isPhysical = isPhysical;
+  protected readonly isOnline = isOnline;
 
   protected unlock(): void {
     const cart = this.cart();
@@ -103,7 +120,7 @@ export class CartDetail {
       .afterClosed()
       .subscribe((updated?: Cart) => {
         if (!updated) return;
-        this.snackBar.open(`${updated.id} unlocked. The shopper can continue.`, 'OK', { duration: 4000 });
+        this.snackBar.open(this.i18n.t('cart.unlocked', { id: updated.id }), 'OK', { duration: 4000 });
         this.refresh.update((n) => n + 1);
       });
   }
@@ -112,8 +129,8 @@ export class CartDetail {
     const cart = this.cart();
     if (!cart) return;
     this.supervision.flagForAudit(cart, cart.lastEvent).subscribe({
-      next: () => this.snackBar.open(`${cart.id} flagged for audit.`, 'OK', { duration: 3000 }),
-      error: () => this.snackBar.open('The audit flag could not be saved.', 'OK', { duration: 3000 }),
+      next: () => this.snackBar.open(this.i18n.t('cart.flagged', { id: cart.id }), 'OK', { duration: 3000 }),
+      error: () => this.snackBar.open(this.i18n.t('cart.flagFailed'), 'OK', { duration: 3000 }),
     });
   }
 }

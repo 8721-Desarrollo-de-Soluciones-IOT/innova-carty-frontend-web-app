@@ -43,3 +43,8 @@ table.items { width: 100%; border-collapse: collapse; font-size: 14px; min-width
   .summary { grid-template-columns: repeat(2, 1fr); }
 }
 .items td.num { white-space: nowrap; }
+
+.device { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: var(--ic-ink-2); }
+.device .dot { width: 8px; height: 8px; border-radius: 50%; background: #9aa5b1; }
+.device.online { color: #00794a; }
+.device.online .dot { background: #009e60; box-shadow: 0 0 0 3px rgba(0, 158, 96, 0.18); }

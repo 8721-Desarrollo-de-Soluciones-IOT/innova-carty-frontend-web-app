@@ -1,17 +1,17 @@
 <section class="page">
   <div class="page-head">
-    <h2>Carts</h2>
-    <span class="caption">Live · refreshes every 5 s</span>
+    <h2>{{ 'carts.title' | t }}</h2>
+    <span class="caption">{{ 'common.live' | t }}</span>
   </div>
 
   <div class="toolbar">
     <mat-form-field appearance="outline" class="search-field" subscriptSizing="dynamic">
       <mat-icon matPrefix>search</mat-icon>
-      <input matInput placeholder="Search by cart ID, order or zone" [value]="query()" (input)="query.set($any($event.target).value)" aria-label="Search carts" />
+      <input matInput [placeholder]="'carts.search' | t" [value]="query()" (input)="query.set($any($event.target).value)" [attr.aria-label]="'carts.search' | t" />
     </mat-form-field>
-    <mat-chip-listbox aria-label="Filter by status" [value]="filter()" (change)="setFilter($event.value ?? 'ALL')">
+    <mat-chip-listbox [attr.aria-label]="'carts.filter' | t" [value]="filter()" (change)="setFilter($event.value ?? 'ALL')">
       @for (f of filters(); track f.value) {
-        <mat-chip-option [value]="f.value">{{ f.label }} · {{ f.count }}</mat-chip-option>
+        <mat-chip-option [value]="f.value">{{ f.label | t }} · {{ f.count }}</mat-chip-option>
       }
     </mat-chip-listbox>
   </div>
@@ -20,50 +20,57 @@
     <mat-progress-bar mode="indeterminate" />
   }
   @if (failed()) {
-    <div class="card error" role="alert"><mat-icon>cloud_off</mat-icon> We could not load the carts. Check that the API is running.</div>
+    <div class="card error" role="alert"><mat-icon>cloud_off</mat-icon> {{ 'carts.failed' | t }}</div>
   }
 
   <div class="card table-card">
     <div class="table-scroll">
-      <table mat-table [dataSource]="dataSource" matSort aria-label="Carts">
+      <table mat-table [dataSource]="dataSource" matSort [attr.aria-label]="'carts.title' | t">
         <ng-container matColumnDef="id">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>Cart</th>
-          <td mat-cell *matCellDef="let c"><b>{{ c.id }}</b></td>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'carts.col.id' | t }}</th>
+          <td mat-cell *matCellDef="let c">
+            <div class="col tight">
+              <b>{{ c.id }}</b>
+              @if (isPhysical(c)) {
+                <span class="device" [class.online]="isOnline(c)" [matTooltip]="'device.hint' | t"><span class="dot"></span>{{ 'device.real' | t }}</span>
+              }
+            </div>
+          </td>
         </ng-container>
         <ng-container matColumnDef="status">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>Status</th>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'carts.col.status' | t }}</th>
           <td mat-cell *matCellDef="let c"><app-status-chip [status]="c.status" /></td>
         </ng-container>
         <ng-container matColumnDef="itemsCount">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>Items</th>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'carts.col.items' | t }}</th>
           <td mat-cell *matCellDef="let c">{{ c.itemsCount || '—' }}</td>
         </ng-container>
         <ng-container matColumnDef="total">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>Total</th>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'carts.col.total' | t }}</th>
           <td mat-cell *matCellDef="let c" class="num">{{ c.total ? (c.total | currency: 'PEN' : 'S/ ') : '—' }}</td>
         </ng-container>
         <ng-container matColumnDef="budget">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>Budget</th>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'carts.col.budget' | t }}</th>
           <td mat-cell *matCellDef="let c">
             @if (c.budget) {
               {{ c.budget | currency: 'PEN' : 'S/ ' }}
             } @else {
-              <span class="caption">No limit</span>
+              <span class="caption">{{ 'common.noLimit' | t }}</span>
             }
           </td>
         </ng-container>
         <ng-container matColumnDef="zone">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>Zone</th>
-          <td mat-cell *matCellDef="let c">{{ c.zone }}</td>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'carts.col.zone' | t }}</th>
+          <td mat-cell *matCellDef="let c">{{ c.zone | st }}</td>
         </ng-container>
         <ng-container matColumnDef="lastEvent">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header="lastEventAt">Last event</th>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header="lastEventAt">{{ 'carts.col.lastEvent' | t }}</th>
           <td mat-cell *matCellDef="let c">
-            <div class="col tight"><span>{{ c.lastEvent }}</span><span class="caption">{{ c.lastEventAt | date: 'HH:mm:ss' }}</span></div>
+            <div class="col tight"><span>{{ c.lastEvent | st }}</span><span class="caption">{{ c.lastEventAt | date: 'HH:mm:ss' }}</span></div>
           </td>
         </ng-container>
         <ng-container matColumnDef="alerts">
-          <th mat-header-cell *matHeaderCellDef>Alerts</th>
+          <th mat-header-cell *matHeaderCellDef>{{ 'carts.col.alerts' | t }}</th>
           <td mat-cell *matCellDef="let c">
             @if (openAlerts().get(c.id); as n) {
               <span class="chip err"><mat-icon>notifications_active</mat-icon>{{ n }}</span>
@@ -73,7 +80,7 @@
           </td>
         </ng-container>
         <ng-container matColumnDef="battery">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>Battery</th>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'carts.col.battery' | t }}</th>
           <td mat-cell *matCellDef="let c">
             <span class="row caption battery" [class.low]="c.battery < 20">
               <mat-icon>{{ c.battery < 20 ? 'battery_1_bar' : c.battery < 60 ? 'battery_4_bar' : 'battery_full' }}</mat-icon>{{ c.battery }}%
@@ -81,7 +88,7 @@
           </td>
         </ng-container>
         <ng-container matColumnDef="open">
-          <th mat-header-cell *matHeaderCellDef><span class="cdk-visually-hidden">Open</span></th>
+          <th mat-header-cell *matHeaderCellDef><span class="cdk-visually-hidden">{{ 'carts.col.open' | t }}</span></th>
           <td mat-cell *matCellDef="let c"><mat-icon class="muted">chevron_right</mat-icon></td>
         </ng-container>
 
@@ -96,10 +103,10 @@
           (keydown.enter)="open(row)"
         ></tr>
         <tr class="mat-row" *matNoDataRow>
-          <td class="mat-cell no-data" [attr.colspan]="columns.length">No carts match the filters.</td>
+          <td class="mat-cell no-data" [attr.colspan]="columns.length">{{ 'carts.empty' | t }}</td>
         </tr>
       </table>
     </div>
-    <mat-paginator [length]="dataSource.filteredData.length" [pageSize]="8" [pageSizeOptions]="[8, 16, 40]" aria-label="Select page of carts" />
+    <mat-paginator [length]="dataSource.filteredData.length" [pageSize]="8" [pageSizeOptions]="[8, 16, 40]" [attr.aria-label]="'carts.page' | t" />
   </div>
 </section>

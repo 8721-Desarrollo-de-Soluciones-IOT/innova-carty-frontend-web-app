@@ -7,11 +7,13 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
+import { ServerTextPipe, TranslatePipe } from '../../../../shared/i18n/translate.pipe';
 import { CartSupervisionService, UnlockCartCommand } from '../../../application/cart-supervision.service';
 import { Cart } from '../../../domain/model/cart.entity';
 
 export type UnlockCartDialogData = Omit<UnlockCartCommand, 'resolution' | 'pin' | 'note'>;
 
+/** Saved in English in the audit log; shown in the current language with the st pipe. */
 export const RESOLUTIONS = [
   'Item placed again and read correctly',
   'Unregistered item removed from the cart',
@@ -22,40 +24,50 @@ export const RESOLUTIONS = [
 
 @Component({
   selector: 'app-unlock-cart-dialog',
-  imports: [ReactiveFormsModule, MatButtonModule, MatDialogModule, MatFormFieldModule, MatIconModule, MatInputModule, MatSelectModule],
+  imports: [
+    ReactiveFormsModule,
+    MatButtonModule,
+    MatDialogModule,
+    MatFormFieldModule,
+    MatIconModule,
+    MatInputModule,
+    MatSelectModule,
+    ServerTextPipe,
+    TranslatePipe,
+  ],
   template: `
-    <h2 mat-dialog-title class="row"><mat-icon>lock_open</mat-icon> Unlock {{ data.cart.id }}</h2>
+    <h2 mat-dialog-title class="row"><mat-icon>lock_open</mat-icon> {{ 'unlock.title' | t: { id: data.cart.id } }}</h2>
     <form mat-dialog-content [formGroup]="form" id="unlock-form" (ngSubmit)="confirm()" class="form">
-      <p class="muted">Confirm you checked the cart in person. The resolution is saved in the audit log.</p>
+      <p class="muted">{{ 'unlock.text' | t }}</p>
       <mat-form-field appearance="outline">
-        <mat-label>Resolution</mat-label>
+        <mat-label>{{ 'unlock.resolution' | t }}</mat-label>
         <mat-select formControlName="resolution">
           @for (r of resolutions; track r) {
-            <mat-option [value]="r">{{ r }}</mat-option>
+            <mat-option [value]="r">{{ r | st }}</mat-option>
           }
         </mat-select>
       </mat-form-field>
       <mat-form-field appearance="outline">
-        <mat-label>Supervisor PIN</mat-label>
+        <mat-label>{{ 'unlock.pin' | t }}</mat-label>
         <input matInput type="password" inputmode="numeric" maxlength="4" formControlName="pin" autocomplete="off" />
         @if (form.controls.pin.hasError('pattern') || form.controls.pin.hasError('required')) {
-          <mat-error>Enter your 4-digit PIN</mat-error>
+          <mat-error>{{ 'unlock.pinRequired' | t }}</mat-error>
         }
         @if (form.controls.pin.hasError('wrong')) {
-          <mat-error>Incorrect PIN</mat-error>
+          <mat-error>{{ 'unlock.pinWrong' | t }}</mat-error>
         }
       </mat-form-field>
       <mat-form-field appearance="outline">
-        <mat-label>Note (optional)</mat-label>
-        <textarea matInput rows="2" formControlName="note" placeholder="Add a comment for the audit log"></textarea>
+        <mat-label>{{ 'unlock.note' | t }}</mat-label>
+        <textarea matInput rows="2" formControlName="note" [placeholder]="'unlock.notePlaceholder' | t"></textarea>
       </mat-form-field>
       @if (error()) {
-        <p class="error" role="alert">{{ error() }}</p>
+        <p class="error" role="alert">{{ error()! | t }}</p>
       }
     </form>
     <div mat-dialog-actions align="end">
-      <button mat-button mat-dialog-close type="button">Cancel</button>
-      <button mat-flat-button type="submit" form="unlock-form" [disabled]="saving()">Unlock cart</button>
+      <button mat-button mat-dialog-close type="button">{{ 'common.cancel' | t }}</button>
+      <button mat-flat-button type="submit" form="unlock-form" [disabled]="saving()">{{ 'unlock.submit' | t }}</button>
     </div>
   `,
   styles: `
@@ -92,7 +104,7 @@ export class UnlockCartDialog {
         if (err.status === 403) {
           this.form.controls.pin.setErrors({ wrong: true });
         } else {
-          this.error.set('The cart could not be unlocked. Try again.');
+          this.error.set('unlock.failed');
         }
       },
     });

@@ -1,7 +1,7 @@
 <section class="page">
   <div class="page-head">
     <h2>{{ greeting() }}</h2>
-    <span class="caption live"><span class="pulse"></span> Live · refreshes every 5 s</span>
+    <span class="caption live"><span class="pulse"></span> {{ 'common.live' | t }}</span>
   </div>
 
   @if (loading()) {
@@ -9,60 +9,60 @@
   } @else if (failed()) {
     <div class="card empty" role="alert">
       <mat-icon>cloud_off</mat-icon>
-      <p>We could not load the fleet data. Check that the API is running (<code>npm run api</code>).</p>
+      <p>{{ 'dash.failed' | t }}</p>
     </div>
   } @else {
     <div class="kpis">
       <a class="card kpi" routerLink="/carts">
-        <div class="row"><span class="muted">Active carts</span><span class="spacer"></span><span class="chip ok icon"><mat-icon>shopping_cart</mat-icon></span></div>
+        <div class="row"><span class="muted">{{ 'dash.activeCarts' | t }}</span><span class="spacer"></span><span class="chip ok icon"><mat-icon>shopping_cart</mat-icon></span></div>
         <span class="num value">{{ activeCount() }} / {{ store()?.fleetSize ?? carts().length }}</span>
-        <span class="caption">{{ carts().length }} carts reporting to the gateway</span>
+        <span class="caption">{{ 'dash.reporting' | t: { n: carts().length } }}</span>
       </a>
       <a class="card kpi" routerLink="/alerts">
-        <div class="row"><span class="muted">Open alerts</span><span class="spacer"></span><span class="chip err icon"><mat-icon>notifications_active</mat-icon></span></div>
+        <div class="row"><span class="muted">{{ 'dash.openAlerts' | t }}</span><span class="spacer"></span><span class="chip err icon"><mat-icon>notifications_active</mat-icon></span></div>
         <span class="num value">{{ openAlerts().length }}</span>
-        <span class="caption">{{ criticalCount() }} critical · {{ openAlerts().length - criticalCount() }} warnings</span>
+        <span class="caption">{{ 'dash.alertSplit' | t: { critical: criticalCount(), warnings: openAlerts().length - criticalCount() } }}</span>
       </a>
       <div class="card kpi">
-        <div class="row"><span class="muted">Avg. checkout time</span><span class="spacer"></span><span class="chip info icon"><mat-icon>timer</mat-icon></span></div>
+        <div class="row"><span class="muted">{{ 'dash.avgCheckout' | t }}</span><span class="spacer"></span><span class="chip info icon"><mat-icon>timer</mat-icon></span></div>
         <span class="num value">{{ store()?.avgCheckoutSeconds }} s</span>
-        <span class="caption">↓ {{ -(store()?.checkoutTimeVsCashier ?? 0) }}% vs. cashier lanes</span>
+        <span class="caption">{{ 'dash.vsCashier' | t: { n: -(store()?.checkoutTimeVsCashier ?? 0) } }}</span>
       </div>
       <div class="card kpi">
-        <div class="row"><span class="muted">Shrinkage prevented</span><span class="spacer"></span><span class="chip warn icon"><mat-icon>savings</mat-icon></span></div>
+        <div class="row"><span class="muted">{{ 'dash.shrinkage' | t }}</span><span class="spacer"></span><span class="chip warn icon"><mat-icon>savings</mat-icon></span></div>
         <span class="num value">{{ store()?.shrinkagePreventedWeek | currency: 'PEN' : 'S/ ' : '1.0-0' }}</span>
-        <span class="caption">This week · {{ store()?.discrepanciesSolvedWeek }} discrepancies solved</span>
+        <span class="caption">{{ 'dash.thisWeek' | t: { n: store()?.discrepanciesSolvedWeek } }}</span>
       </div>
     </div>
 
     <div class="grid">
       <div class="card panel">
-        <div class="row"><h4>Active sessions by hour</h4><span class="spacer"></span><span class="chip off">Today</span></div>
-        <app-line-chart [points]="chart()" ariaLabel="Active shopping sessions by hour, today" />
+        <div class="row"><h4>{{ 'dash.sessionsByHour' | t }}</h4><span class="spacer"></span><span class="chip off">{{ 'dash.today' | t }}</span></div>
+        <app-line-chart [points]="chart()" [ariaLabel]="'dash.chartLabel' | t" />
       </div>
 
       <div class="card panel alerts">
-        <div class="row"><h4>Live alerts</h4><span class="spacer"></span><a mat-button routerLink="/alerts">View all</a></div>
+        <div class="row"><h4>{{ 'dash.liveAlerts' | t }}</h4><span class="spacer"></span><a mat-button routerLink="/alerts">{{ 'dash.viewAll' | t }}</a></div>
         @for (alert of openAlerts().slice(0, 4); track alert.id) {
           <a class="alert" [routerLink]="['/carts', alert.cartId]">
             <span class="chip {{ tones[alert.severity] }} square"><mat-icon>{{ icons[alert.type] }}</mat-icon></span>
             <span class="col alert__text">
-              <span class="alert__title">{{ alert.cartId }} · {{ alert.title }}</span>
-              <span class="caption">{{ alert.zone }} · {{ alert.createdAt | date: 'HH:mm' }}</span>
+              <span class="alert__title">{{ alert.cartId }} · {{ alert.title | st }}</span>
+              <span class="caption">{{ alert.zone | st }} · {{ alert.createdAt | date: 'HH:mm' }}</span>
             </span>
             <mat-icon class="muted">chevron_right</mat-icon>
           </a>
         } @empty {
-          <p class="muted empty-alerts"><mat-icon>check_circle</mat-icon> No open alerts. The fleet is running smoothly.</p>
+          <p class="muted empty-alerts"><mat-icon>check_circle</mat-icon> {{ 'dash.noAlerts' | t }}</p>
         }
       </div>
     </div>
 
     <div class="card fleet">
-      <h4>Fleet status</h4>
+      <h4>{{ 'dash.fleetStatus' | t }}</h4>
       @for (f of fleet(); track f.status) {
         <a class="row" [routerLink]="['/carts']" [queryParams]="{ status: f.status }">
-          <span class="chip {{ f.tone }}">{{ f.label }}</span><b>{{ f.count }}</b>
+          <span class="chip {{ f.tone }}">{{ f.label | t }}</span><b>{{ f.count }}</b>
         </a>
       }
     </div>

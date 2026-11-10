@@ -1,5 +1,5 @@
 <h2 mat-dialog-title class="row">
-  {{ isNew ? 'Add product' : 'Edit ' + data.product?.name }}
+  {{ isNew ? ('product.add' | t) : ('product.edit' | t: { name: data.product?.name }) }}
   <span class="spacer"></span>
   @if (!isNew) { <span class="caption">{{ data.product?.id }}</span> }
 </h2>
@@ -8,57 +8,57 @@
   <div class="grid">
     @if (isNew) {
       <mat-form-field appearance="outline">
-        <mat-label>SKU</mat-label>
+        <mat-label>{{ 'product.sku' | t }}</mat-label>
         <input matInput formControlName="id" placeholder="SKU-00000" />
         @if (form.controls.id.hasError('duplicate')) {
-          <mat-error>This SKU already exists</mat-error>
+          <mat-error>{{ 'product.skuDuplicate' | t }}</mat-error>
         } @else if (form.controls.id.invalid) {
-          <mat-error>Use the format SKU-00000</mat-error>
+          <mat-error>{{ 'product.skuFormat' | t }}</mat-error>
         }
       </mat-form-field>
     }
     <mat-form-field appearance="outline" [class.span]="!isNew">
-      <mat-label>Product name</mat-label>
+      <mat-label>{{ 'product.name' | t }}</mat-label>
       <input matInput formControlName="name" />
-      @if (form.controls.name.invalid) { <mat-error>Enter a name (max. 60 characters)</mat-error> }
+      @if (form.controls.name.invalid) { <mat-error>{{ 'product.nameInvalid' | t }}</mat-error> }
     </mat-form-field>
     <mat-form-field appearance="outline">
-      <mat-label>Category</mat-label>
+      <mat-label>{{ 'product.category' | t }}</mat-label>
       <mat-select formControlName="category">
-        @for (c of categories; track c) { <mat-option [value]="c">{{ c }}</mat-option> }
+        @for (c of categories; track c) { <mat-option [value]="c">{{ 'cat.' + c | t }}</mat-option> }
       </mat-select>
     </mat-form-field>
     <mat-form-field appearance="outline">
-      <mat-label>RFID tag prefix</mat-label>
+      <mat-label>{{ 'product.tag' | t }}</mat-label>
       <input matInput formControlName="rfidPrefix" placeholder="E200 3412 0000" />
-      @if (form.controls.rfidPrefix.invalid) { <mat-error>Format: E200 0000 0000</mat-error> }
+      @if (form.controls.rfidPrefix.invalid) { <mat-error>{{ 'product.tagFormat' | t }}</mat-error> }
     </mat-form-field>
     <mat-form-field appearance="outline">
-      <mat-label>Price (S/)</mat-label>
+      <mat-label>{{ 'product.price' | t }}</mat-label>
       <input matInput type="number" step="0.1" min="0" formControlName="price" />
-      @if (form.controls.price.invalid) { <mat-error>Must be greater than 0</mat-error> }
+      @if (form.controls.price.invalid) { <mat-error>{{ 'product.positive' | t }}</mat-error> }
     </mat-form-field>
     <mat-form-field appearance="outline">
-      <mat-label>Nominal weight (g)</mat-label>
+      <mat-label>{{ 'product.weight' | t }}</mat-label>
       <input matInput type="number" min="1" formControlName="nominalWeight" />
-      @if (form.controls.nominalWeight.invalid) { <mat-error>Must be greater than 0</mat-error> }
+      @if (form.controls.nominalWeight.invalid) { <mat-error>{{ 'product.positive' | t }}</mat-error> }
     </mat-form-field>
     <mat-form-field appearance="outline">
-      <mat-label>Tolerance (%)</mat-label>
+      <mat-label>{{ 'product.tolerance' | t }}</mat-label>
       <input matInput type="number" min="1" max="15" formControlName="tolerance" />
-      @if (form.controls.tolerance.invalid) { <mat-error>Between 1% and 15%</mat-error> }
+      @if (form.controls.tolerance.invalid) { <mat-error>{{ 'product.toleranceRange' | t }}</mat-error> }
     </mat-form-field>
     <div class="range">
-      <span class="caption">Allowed range</span>
+      <span class="caption">{{ 'product.range' | t }}</span>
       <b>{{ range().min | number }} – {{ range().max | number }} g</b>
     </div>
   </div>
 
-  <p class="sync"><mat-icon>sync</mat-icon> Saving pushes the new rule to the edge gateway and {{ data.fleetSize }} carts.</p>
-  @if (error()) { <p class="error" role="alert">{{ error() }}</p> }
+  <p class="sync"><mat-icon>sync</mat-icon> {{ 'product.sync' | t: { n: data.fleetSize } }}</p>
+  @if (error()) { <p class="error" role="alert">{{ error()! | t }}</p> }
 </form>
 
 <div mat-dialog-actions align="end">
-  <button mat-button mat-dialog-close type="button">Cancel</button>
-  <button mat-flat-button type="submit" form="product-form" [disabled]="saving()">{{ isNew ? 'Add and sync' : 'Save and sync' }}</button>
+  <button mat-button mat-dialog-close type="button">{{ 'common.cancel' | t }}</button>
+  <button mat-flat-button type="submit" form="product-form" [disabled]="saving()">{{ (isNew ? 'product.addSync' : 'product.saveSync') | t }}</button>
 </div>

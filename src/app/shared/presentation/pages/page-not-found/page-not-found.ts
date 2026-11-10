@@ -2,16 +2,17 @@ import { Component } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { RouterLink } from '@angular/router';
+import { TranslatePipe } from '../../../i18n/translate.pipe';
 
 @Component({
   selector: 'app-page-not-found',
-  imports: [MatButtonModule, MatIconModule, RouterLink],
+  imports: [MatButtonModule, MatIconModule, RouterLink, TranslatePipe],
   template: `
     <section class="page not-found">
       <mat-icon>travel_explore</mat-icon>
-      <h2>Page not found</h2>
-      <p class="muted">The page you are looking for does not exist or was moved.</p>
-      <a mat-flat-button routerLink="/dashboard"><mat-icon>dashboard</mat-icon> Back to dashboard</a>
+      <h2>{{ 'notFound.title' | t }}</h2>
+      <p class="muted">{{ 'notFound.text' | t }}</p>
+      <a mat-flat-button routerLink="/dashboard"><mat-icon>dashboard</mat-icon> {{ 'notFound.back' | t }}</a>
     </section>
   `,
   styles: `

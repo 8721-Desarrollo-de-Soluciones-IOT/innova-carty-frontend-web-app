@@ -7,3 +7,8 @@ table { min-width: 960px; }
 .error { display: flex; align-items: center; gap: 10px; padding: 14px 16px; color: #b3261e; }
 .mat-column-id, .mat-column-total, .mat-column-budget, .mat-column-status { white-space: nowrap; }
 .mat-column-lastEvent { min-width: 190px; } .mat-column-zone { white-space: nowrap; }
+
+.device { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 600; color: var(--ic-ink-2); white-space: nowrap; }
+.device .dot { width: 7px; height: 7px; border-radius: 50%; background: #9aa5b1; }
+.device.online { color: #00794a; }
+.device.online .dot { background: #009e60; box-shadow: 0 0 0 3px rgba(0, 158, 96, 0.18); }

@@ -16,6 +16,8 @@ import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { catchError, combineLatest, map, of, switchMap } from 'rxjs';
 import { StoresApi } from '../../../../monitoring/infrastructure/monitoring-api';
+import { I18n } from '../../../../shared/i18n/i18n.service';
+import { TranslatePipe } from '../../../../shared/i18n/translate.pipe';
 import { PRODUCT_CATEGORIES, Product } from '../../../domain/model/product.entity';
 import { ProductsApi } from '../../../infrastructure/products-api';
 import { ProductFormDialog, ProductFormDialogData } from '../../components/product-form-dialog/product-form-dialog';
@@ -37,6 +39,7 @@ import { ProductFormDialog, ProductFormDialogData } from '../../components/produ
     MatSortModule,
     MatTableModule,
     MatTooltipModule,
+    TranslatePipe,
   ],
   templateUrl: './product-catalog.html',
   styleUrl: './product-catalog.css',
@@ -46,6 +49,7 @@ export class ProductCatalog implements AfterViewInit {
   private readonly storesApi = inject(StoresApi);
   private readonly dialog = inject(MatDialog);
   private readonly snackBar = inject(MatSnackBar);
+  private readonly i18n = inject(I18n);
   private readonly reload = signal(0);
 
   private readonly paginator = viewChild(MatPaginator);
@@ -106,7 +110,7 @@ export class ProductCatalog implements AfterViewInit {
       .afterClosed()
       .subscribe((saved?: Product) => {
         if (!saved) return;
-        this.snackBar.open(`${saved.name} saved and synced to ${data.fleetSize} carts.`, 'OK', { duration: 4000 });
+        this.snackBar.open(this.i18n.t('catalog.saved', { name: saved.name, n: data.fleetSize }), 'OK', { duration: 4000 });
         this.reload.update((n) => n + 1);
       });
   }

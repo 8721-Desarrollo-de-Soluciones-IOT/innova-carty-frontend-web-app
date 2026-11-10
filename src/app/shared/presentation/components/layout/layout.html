@@ -11,7 +11,7 @@
       <span><span class="logo__a">INNOVA</span>&nbsp;<span class="logo__b">CARTY</span></span>
     </a>
 
-    <nav class="menu" aria-label="Main">
+    <nav class="menu" [attr.aria-label]="'nav.main' | t">
       @for (item of nav; track item.link) {
         <a
           class="menu__item"
@@ -20,7 +20,7 @@
           (click)="isHandset() && drawer.close()"
         >
           <mat-icon>{{ item.icon }}</mat-icon>
-          <span>{{ item.label }}</span>
+          <span>{{ item.label | t }}</span>
           @if (item.link === '/alerts' && openAlerts() > 0) {
             <span class="spacer"></span><span class="chip err count">{{ openAlerts() }}</span>
           }
@@ -32,11 +32,11 @@
 
     @if (store(); as s) {
       <div class="store card">
-        <span class="caption">Store</span>
+        <span class="caption">{{ 'layout.store' | t }}</span>
         <b>{{ s.name }}</b>
         <span class="caption row">
           <span class="dot" [class.online]="s.gatewayStatus === 'ONLINE'"></span>
-          {{ s.fleetSize }} carts · edge gateway {{ s.gatewayStatus === 'ONLINE' ? 'online' : 'offline' }}
+          {{ 'layout.storeLine' | t: { carts: s.fleetSize, state: ((s.gatewayStatus === 'ONLINE' ? 'layout.online' : 'layout.offline') | t) } }}
         </span>
       </div>
     }
@@ -45,7 +45,7 @@
   <mat-sidenav-content class="content">
     <header class="topbar">
       @if (isHandset()) {
-        <button mat-icon-button (click)="drawer.toggle()" aria-label="Open menu"><mat-icon>menu</mat-icon></button>
+        <button mat-icon-button (click)="drawer.toggle()" [attr.aria-label]="'layout.openMenu' | t"><mat-icon>menu</mat-icon></button>
       }
       <form class="search" (ngSubmit)="submitSearch()" role="search">
         <mat-icon>search</mat-icon>
@@ -53,30 +53,31 @@
           name="q"
           [ngModel]="search()"
           (ngModelChange)="search.set($event)"
-          placeholder="Search carts by ID or zone"
-          aria-label="Search carts"
+          [placeholder]="'layout.search' | t"
+          [attr.aria-label]="'layout.search' | t"
         />
       </form>
       <span class="spacer"></span>
+      <app-lang-switch />
       <a
         mat-icon-button
         routerLink="/alerts"
-        aria-label="Open alerts"
-        matTooltip="Open alerts"
+        [attr.aria-label]="'layout.openAlerts' | t"
+        [matTooltip]="'layout.openAlerts' | t"
       >
         <mat-icon [matBadge]="openAlerts() || null" matBadgeColor="warn" matBadgeSize="small">notifications</mat-icon>
       </a>
-      <button class="user" [matMenuTriggerFor]="userMenu" aria-label="Account menu">
+      <button class="user" [matMenuTriggerFor]="userMenu" [attr.aria-label]="'layout.account' | t">
         <span class="avatar">{{ userInitials() }}</span>
         <span class="user__text">
           <b>{{ user()?.fullName }}</b>
-          <span class="caption">{{ user()?.jobTitle || user()?.role }}</span>
+          <span class="caption">{{ (user()?.jobTitle || user()?.role) | st }}</span>
         </span>
         <mat-icon>expand_more</mat-icon>
       </button>
       <mat-menu #userMenu="matMenu" xPosition="before">
         <div class="menu-head caption">{{ user()?.email }}</div>
-        <button mat-menu-item (click)="signOut()"><mat-icon>logout</mat-icon> Sign out</button>
+        <button mat-menu-item (click)="signOut()"><mat-icon>logout</mat-icon> {{ 'layout.signOut' | t }}</button>
       </mat-menu>
     </header>
 
